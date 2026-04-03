@@ -1,0 +1,137 @@
+{
+  "colorScheme": "dark",
+  "fonts": [
+    {
+      "family": "Space Grotesk",
+      "role": "heading"
+    },
+    {
+      "family": "Unbounded",
+      "role": "display"
+    }
+  ],
+  "colors": {
+    "primary": "#FF5500",
+    "secondary": "#F5EFE0",
+    "accent": "#FF5500",
+    "background": "#080808",
+    "textPrimary": "#080808",
+    "link": "#9C3603"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Space Grotesk",
+      "heading": "Space Grotesk"
+    },
+    "fontStacks": {
+      "heading": [
+        "Unbounded",
+        "ui-sans-serif",
+        "system-ui",
+        "sans-serif"
+      ],
+      "body": [
+        "Space Grotesk",
+        "ui-sans-serif",
+        "system-ui",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Space Grotesk",
+        "ui-sans-serif",
+        "system-ui",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "160px",
+      "h2": "60px",
+      "body": "18px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 8,
+    "borderRadius": "0px"
+  },
+  "components": {
+    "buttonPrimary": {
+      "background": "#FF5500",
+      "textColor": "#080808",
+      "borderRadius": "12px",
+      "borderRadiusCorners": {
+        "topLeft": "12px",
+        "topRight": "12px",
+        "bottomRight": "12px",
+        "bottomLeft": "12px"
+      },
+      "shadow": "none"
+    },
+    "buttonSecondary": {
+      "background": "transparent",
+      "textColor": "#6B6B6B",
+      "borderColor": "#212121",
+      "borderRadius": "12px",
+      "borderRadiusCorners": {
+        "topLeft": "12px",
+        "topRight": "12px",
+        "bottomRight": "12px",
+        "bottomLeft": "12px"
+      },
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "favicon": null,
+    "ogImage": null
+  },
+  "__llm_logo_reasoning": {
+    "selectedIndex": -1,
+    "reasoning": "The candidate logo is too small and lacks clear branding elements that match 'PASSION PITCH-CONNECT'.",
+    "confidence": 0.3,
+    "rejected": true,
+    "source": "llm"
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": 0,
+      "text": "JOIN NOW",
+      "reasoning": "Button #0 'JOIN NOW' uses the vibrant brand color #FF5500 and has a strong call-to-action text, making it the primary CTA."
+    },
+    "secondary": {
+      "index": 2,
+      "text": "Our Team",
+      "reasoning": "Button #2 'Our Team' has a transparent background, providing a clear visual distinction from the primary button, making it suitable as a secondary CTA."
+    },
+    "confidence": 0.95
+  },
+  "personality": {
+    "tone": "bold",
+    "energy": "high",
+    "targetAudience": "young professionals and entrepreneurs"
+  },
+  "designSystem": {
+    "framework": "tailwind",
+    "componentLibrary": ""
+  },
+  "confidence": {
+    "buttons": 0.95,
+    "colors": 0.9,
+    "overall": 0.925
+  },
+  "__llm_metadata": {
+    "logoSelection": {
+      "llmCalled": true,
+      "llmSucceeded": true,
+      "finalSource": "llm",
+      "rawLogoSelection": {
+        "selectedLogoIndex": -1,
+        "selectedLogoReasoning": "The candidate logo is too small and lacks clear branding elements that match 'PASSION PITCH-CONNECT'.",
+        "confidence": 0.3
+      }
+    },
+    "buttonClassification": {
+      "llmCalled": true,
+      "llmSucceeded": true
+    }
+  }
+}

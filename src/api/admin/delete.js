@@ -1,0 +1,66 @@
+// Delete username API endpoint
+import { connectToDatabase } from '../_lib/db.js';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+function verifyToken(token) {
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return null;
+  }
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'DELETE') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    if (!JWT_SECRET) {
+      return res.status(500).json({ error: 'Server misconfigured' });
+    }
+
+    // Verify admin token from cookie
+    const cookie = req.headers.cookie || '';
+    const tokenMatch = cookie.match(/admin_token=([^;]+)/);
+    
+    if (!tokenMatch) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const decoded = verifyToken(tokenMatch[1]);
+    if (!decoded || decoded.role !== 'admin') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const username = req.query.username || req.body.username;
+
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+
+    const db = await connectToDatabase();
+    const User = db.model('User');
+    const Certificate = db.model('Certificate');
+
+    const user = await User.findOne({ username: username.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Username not found' });
+    }
+
+    // Delete user and associated certificate
+    await User.deleteOne({ _id: user._id });
+    await Certificate.deleteOne({ username: username.toLowerCase().trim() });
+
+    return res.status(200).json({ 
+      message: `Username '${username}' has been deleted` 
+    });
+
+  } catch (error) {
+    console.error('Delete username error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "markdown": "[PASSION PITCH](https://passion-pitch-connect.netlify.app/)\n\n[Home](https://passion-pitch-connect.netlify.app/) [Members](https://passion-pitch-connect.netlify.app/members) [Join Club](https://passion-pitch-connect.netlify.app/#join)\n\nThe Future of Student Networking\n\n# PASSION\n\n# PITCH\n\nIgniting the fire of innovation in student founders. We don't just bridge the gap between ideas and execution—we redefine it.\n\n[JOIN NOW](https://passion-pitch-connect.netlify.app/#join) [Our Team](https://passion-pitch-connect.netlify.app/members)\n\nScroll\n\nPASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦PASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦PASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦PASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦\n\nPASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦PASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦PASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦PASSION PITCH✦STARTUP CLUB✦BUILD THE FUTURE✦INNOVATE✦SIMATS✦\n\nFounder Network\n\n## Meet the  Innovators\n\n[View All](https://passion-pitch-connect.netlify.app/members)\n\n![Shalini M](https://pub-1407f82391df4ab1951418d04be76914.r2.dev/uploads/ec132a7e-2a39-4425-9150-3a4a7820ccda.png)\n\nContribute enthusiasm and effort to help the club grow and succeed.\n\n### Shalini M\n\nPresident\n\nCSE\n\n[View Profile](https://passion-pitch-connect.netlify.app/member/0)\n\n![V Abhiram](https://pub-1407f82391df4ab1951418d04be76914.r2.dev/uploads/981a86df-c4ad-4f47-bbd1-e79193bcfb00.jpeg)\n\nWork with the team to plan events, share knowledge, and build innovative solutions\n\n### V Abhiram\n\nVice-President\n\nEEE\n\n[View Profile](https://passion-pitch-connect.netlify.app/member/1)\n\n![Manoj](https://pub-1407f82391df4ab1951418d04be76914.r2.dev/uploads/06ee2dff-a71a-422d-95e6-d3e22f3c1e4d.jpg)\n\nEngage in organizing events, learning new skills, and supporting team projects.\n\n### Manoj\n\nCo-ordinator\n\nAI & DS\n\n[View Profile](https://passion-pitch-connect.netlify.app/member/2)\n\n![Yarragolla Abhay](https://pub-1407f82391df4ab1951418d04be76914.r2.dev/uploads/3ca127d0-495f-4903-ba15-16f74710736b.jpeg)\n\nWorks with team members to develop innovative ideas, manage club initiatives, and promote student engagement\n\n### Yarragolla Abhay\n\nCo-ordinator\n\nCSE\n\n[View Profile](https://passion-pitch-connect.netlify.app/member/3)\n\n\"We don't just build products. We build futures.\"\n\nApply Now\n\n## Build Your  Future With Us\n\nPASSION PITCH is a home for creators, innovators, designers, developers, and entrepreneurs.\n\n[Build Your Future With Us](https://forms.gle/CEG9iuRYnDC5d7UF9)\n\nPASSION PITCH\n\nEmpowering the next generation of founders through community, collaboration, and capital.\n\n#### Navigation\n\n- [Home](https://passion-pitch-connect.netlify.app/)\n- [Members](https://passion-pitch-connect.netlify.app/members)\n- [Official Platform](https://passion-pitch.netlify.app/)\n\n#### Connect\n\n[Instagram](https://www.instagram.com/passionpitch_simats/)[WhatsApp](https://chat.whatsapp.com/FhSGoTRGKlz4mdIgxA9vvI)\n\n[passionpitchculb@gmail.com](mailto:passionpitchculb@gmail.com)\n\n© 2026 PASSION PITCH. All rights reserved.\n\n[Visit Platform](https://passion-pitch.netlify.app/)",
+  "branding": {
+    "colorScheme": "dark",
+    "fonts": [
+      {
+        "family": "Space Grotesk",
+        "role": "heading"
+      },
+      {
+        "family": "Unbounded",
+        "role": "display"
+      }
+    ],
+    "colors": {
+      "primary": "#FF5500",
+      "secondary": "#F5EFE0",
+      "accent": "#FF5500",
+      "background": "#080808",
+      "textPrimary": "#080808",
+      "link": "#9C3603"
+    },
+    "typography": {
+      "fontFamilies": {
+        "primary": "Space Grotesk",
+        "heading": "Space Grotesk"
+      },
+      "fontStacks": {
+        "heading": [
+          "Unbounded",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif"
+        ],
+        "body": [
+          "Space Grotesk",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif"
+        ],
+        "paragraph": [
+          "Space Grotesk",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif"
+        ]
+      },
+      "fontSizes": {
+        "h1": "160px",
+        "h2": "60px",
+        "body": "18px"
+      }
+    },
+    "spacing": {
+      "baseUnit": 8,
+      "borderRadius": "0px"
+    },
+    "components": {
+      "buttonPrimary": {
+        "background": "#FF5500",
+        "textColor": "#080808",
+        "borderRadius": "12px",
+        "borderRadiusCorners": {
+          "topLeft": "12px",
+          "topRight": "12px",
+          "bottomRight": "12px",
+          "bottomLeft": "12px"
+        },
+        "shadow": "none"
+      },
+      "buttonSecondary": {
+        "background": "transparent",
+        "textColor": "#6B6B6B",
+        "borderColor": "#212121",
+        "borderRadius": "12px",
+        "borderRadiusCorners": {
+          "topLeft": "12px",
+          "topRight": "12px",
+          "bottomRight": "12px",
+          "bottomLeft": "12px"
+        },
+        "shadow": "none"
+      }
+    },
+    "images": {
+      "favicon": null,
+      "ogImage": null
+    },
+    "__llm_logo_reasoning": {
+      "selectedIndex": -1,
+      "reasoning": "The candidate logo is too small and lacks clear branding elements that match 'PASSION PITCH-CONNECT'.",
+      "confidence": 0.3,
+      "rejected": true,
+      "source": "llm"
+    },
+    "__llm_button_reasoning": {
+      "primary": {
+        "index": 0,
+        "text": "JOIN NOW",
+        "reasoning": "Button #0 'JOIN NOW' uses the vibrant brand color #FF5500 and has a strong call-to-action text, making it the primary CTA."
+      },
+      "secondary": {
+        "index": 2,
+        "text": "Our Team",
+        "reasoning": "Button #2 'Our Team' has a transparent background, providing a clear visual distinction from the primary button, making it suitable as a secondary CTA."
+      },
+      "confidence": 0.95
+    },
+    "personality": {
+      "tone": "bold",
+      "energy": "high",
+      "targetAudience": "young professionals and entrepreneurs"
+    },
+    "designSystem": {
+      "framework": "tailwind",
+      "componentLibrary": ""
+    },
+    "confidence": {
+      "buttons": 0.95,
+      "colors": 0.9,
+      "overall": 0.925
+    },
+    "__llm_metadata": {
+      "logoSelection": {
+        "llmCalled": true,
+        "llmSucceeded": true,
+        "finalSource": "llm",
+        "rawLogoSelection": {
+          "selectedLogoIndex": -1,
+          "selectedLogoReasoning": "The candidate logo is too small and lacks clear branding elements that match 'PASSION PITCH-CONNECT'.",
+          "confidence": 0.3
+        }
+      },
+      "buttonClassification": {
+        "llmCalled": true,
+        "llmSucceeded": true
+      }
+    }
+  },
+  "metadata": {
+    "viewport": "width=device-width, initial-scale=1.0",
+    "title": "PASSION PITCH-CONNECT",
+    "language": "en",
+    "scrapeId": "019d4d8e-a10a-7479-a067-2a75c567e3dc",
+    "sourceURL": "https://passion-pitch-connect.netlify.app/",
+    "url": "https://passion-pitch-connect.netlify.app/",
+    "statusCode": 200,
+    "contentType": "text/html; charset=UTF-8",
+    "timezone": "America/New_York",
+    "proxyUsed": "basic",
+    "indexId": "980b23f4-a86a-4c90-9fd0-8323b8373a60",
+    "creditsUsed": 1,
+    "concurrencyLimited": false
+  }
+}
