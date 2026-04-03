@@ -197,7 +197,7 @@ This project is proprietary and developed for SIMATS Engineering.
 
 ## Support
 
-For technical support or issues, please contact the development team.
+For technical support or issues, please contact the development team or me via Mail.
 
 ---
 
