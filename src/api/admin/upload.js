@@ -1,6 +1,7 @@
 // Bulk upload usernames API endpoint
 import { connectToDatabase } from '../_lib/db.js';
 import jwt from 'jsonwebtoken';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '../_lib/rateLimit.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -28,6 +29,15 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server misconfigured' });
     }
 
+    // Apply rate limiting
+    const clientIP = getClientIP(req);
+    const rateLimitKey = `admin-upload:${clientIP}`;
+    const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.ADMIN.maxRequests, RATE_LIMITS.ADMIN.windowMs);
+
+    if (!rateLimit.allowed) {
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+
     // Verify admin token from cookie
     const cookie = req.headers.cookie || '';
     const tokenMatch = cookie.match(/admin_token=([^;]+)/);
@@ -41,13 +51,19 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Parse multipart form data
+    // Parse multipart form data with file size limit (R-10)
     const { default: Busboy } = await import('busboy');
     const { Writable } = await import('stream');
     
-    const bb = Busboy({ headers: req.headers });
+    const bb = Busboy({ 
+      headers: req.headers,
+      limits: {
+        fileSize: 512 * 1024, // 512KB max file size
+      }
+    });
     const usernames = [];
     let errors = [];
+    let fileLimitReached = false;
 
     bb.on('file', (fieldname, file, filename) => {
       if (!filename.endsWith('.csv')) {
@@ -57,11 +73,23 @@ export default async function handler(req, res) {
       }
 
       let data = '';
+      let fileSize = 0;
+
       file.on('data', (chunk) => {
+        fileSize += chunk.length;
+        if (fileSize > 512 * 1024) {
+          fileLimitReached = true;
+          return;
+        }
         data += chunk.toString();
       });
 
       file.on('end', () => {
+        if (fileLimitReached) {
+          errors.push('File size exceeds 512KB limit.');
+          return;
+        }
+
         // Parse CSV
         const lines = data.split('\n').filter(line => line.trim());
         
