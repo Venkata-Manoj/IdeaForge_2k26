@@ -55,6 +55,7 @@ export default async function handler(req, res) {
     const { default: Busboy } = await import('busboy');
     const { Writable } = await import('stream');
     
+    const bb = Busboy({ headers: req.headers, limits: { fileSize: 1024 * 1024 } }); // 1 MB max
     const bb = Busboy({ 
       headers: req.headers,
       limits: {
@@ -65,8 +66,9 @@ export default async function handler(req, res) {
     let errors = [];
     let fileLimitReached = false;
 
-    bb.on('file', (fieldname, file, filename) => {
-      if (!filename.endsWith('.csv')) {
+    bb.on('file', (fieldname, file, info) => {
+      const { filename } = info;
+      if (!filename || !filename.endsWith('.csv')) {
         errors.push('Invalid file type. Only CSV files are allowed.');
         file.resume();
         return;

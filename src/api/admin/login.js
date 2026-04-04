@@ -31,6 +31,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Password is required' });
     }
 
+    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison.
+    // To migrate to bcrypt: set ADMIN_PASSWORD to the output of bcrypt.hashSync('yourpassword', 12)
+    const isBcryptHash = /^\$2[aby]\$/.test(ADMIN_PASSWORD);
+    const isValid = isBcryptHash
+      ? await bcrypt.compare(password, ADMIN_PASSWORD)
+      : password === ADMIN_PASSWORD;
+
+    if (!isValid) {
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
     if (!isValidPassword) {
@@ -44,6 +52,11 @@ export default async function handler(req, res) {
       { expiresIn: '24h' }
     );
 
+    // Set HTTP-only cookie; add Secure flag in production
+    const securePart = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    res.setHeader('Set-Cookie', `admin_token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict${securePart}`);
+
+    return res.status(200).json({ message: 'Login successful' });
     // Set HTTP-only, Secure, SameSite cookie
     const isProduction = process.env.NODE_ENV === 'production';
     const secureFlag = isProduction ? 'Secure; ' : '';

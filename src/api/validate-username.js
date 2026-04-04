@@ -38,12 +38,18 @@ export default async function handler(req, res) {
 
     // Validate username format
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-    if (!usernameRegex.test(username)) {
+    if (!usernameRegex.test(normalizedUsername)) {
       return res.status(400).json({ 
         valid: false, 
         error: 'Only letters, numbers, and underscores allowed (3-30 characters)' 
       });
     }
+
+    const db = await connectToDatabase();
+    const User = db.model('User');
+    
+    // Find user by username
+    const user = await User.findOne({ username: normalizedUsername });
 
     if (!user) {
       return res.status(404).json({ 

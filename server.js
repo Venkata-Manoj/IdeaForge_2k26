@@ -3,14 +3,12 @@ import fs from 'fs';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { logo1Base64, logo2Base64, signatureBase64 } from './src/api/_lib/imageAssets.js';
-
-const app = express();
-app.use(cors());
-app.use(express.json());
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const localEnvPath = path.join(__dirname, '.env');
@@ -36,6 +34,11 @@ if (fs.existsSync(localEnvPath)) {
 const MONGODB_URI = process.env.MONGODB_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+const app = express();
+app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(express.json());
 
 // Connect to MongoDB
 let db;
@@ -223,8 +226,50 @@ async function generateCertificatePDF(data) {
 
 // API Routes
 
+// Simple in-memory rate limiter (per IP, for local dev server)
+const rateLimitStore = new Map();
+// Periodically prune stale entries to prevent unbounded memory growth
+setInterval(() => {
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  for (const [key, timestamps] of rateLimitStore) {
+    const fresh = timestamps.filter(t => t > cutoff);
+    if (fresh.length === 0) rateLimitStore.delete(key);
+    else rateLimitStore.set(key, fresh);
+  }
+}, 5 * 60 * 1000).unref();
+
+function rateLimit(windowMs, maxRequests) {
+  return (req, res, next) => {
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
+    const now = Date.now();
+    const windowStart = now - windowMs;
+    const timestamps = (rateLimitStore.get(ip) || []).filter(t => t > windowStart);
+    timestamps.push(now);
+    rateLimitStore.set(ip, timestamps);
+    if (timestamps.length > maxRequests) {
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+    next();
+  };
+}
+
+// JWT auth middleware for admin routes
+function requireAdmin(req, res, next) {
+  if (!JWT_SECRET) return res.status(500).json({ error: 'Server misconfigured' });
+  const cookie = req.headers.cookie || '';
+  const tokenMatch = cookie.match(/admin_token=([^;]+)/);
+  if (!tokenMatch) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const decoded = jwt.verify(tokenMatch[1], JWT_SECRET);
+    if (!decoded || decoded.role !== 'admin') return res.status(401).json({ error: 'Unauthorized' });
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+}
+
 // Validate Username
-app.post('/api/validate-username', async (req, res) => {
+app.post('/api/validate-username', rateLimit(15 * 60 * 1000, 60), async (req, res) => {
   try {
     const { username } = req.body;
     if (!username) return res.status(400).json({ valid: false, error: 'Username is required' });
@@ -250,7 +295,7 @@ app.post('/api/validate-username', async (req, res) => {
 });
 
 // Generate Certificate
-app.post('/api/generate-certificate', async (req, res) => {
+app.post('/api/generate-certificate', rateLimit(15 * 60 * 1000, 30), async (req, res) => {
   try {
     const { username, name, eventType } = req.body;
 
@@ -269,7 +314,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     user.isGenerated = true;
     await user.save();
 
-    const certificateId = `IF2K26-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const certificateId = `IF2K26-${randomBytes(3).toString('hex').toUpperCase()}-${randomBytes(3).toString('hex').toUpperCase()}`;
     const eventDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const pdfBytes = await generateCertificatePDF({
@@ -300,24 +345,35 @@ app.post('/api/generate-certificate', async (req, res) => {
 });
 
 // Admin Login
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin/login', rateLimit(15 * 60 * 1000, 10), async (req, res) => {
   try {
     const { password } = req.body;
     if (!JWT_SECRET || !ADMIN_PASSWORD) {
       return res.status(500).json({ error: 'Server misconfigured' });
     }
-    if (password !== ADMIN_PASSWORD) {
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison.
+    // To migrate to bcrypt: set ADMIN_PASSWORD to the output of bcrypt.hashSync('yourpassword', 12)
+    const isBcryptHash = /^\$2[aby]\$/.test(ADMIN_PASSWORD);
+    const isValid = isBcryptHash
+      ? await bcrypt.compare(password, ADMIN_PASSWORD)
+      : password === ADMIN_PASSWORD;
+    if (!isValid) {
       return res.status(401).json({ error: 'Invalid password' });
     }
     const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
-    res.status(200).json({ token, role: 'admin' });
+    const securePart = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    res.setHeader('Set-Cookie', `admin_token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict${securePart}`);
+    res.status(200).json({ message: 'Login successful' });
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }
 });
 
 // Get Usernames
-app.get('/api/admin/usernames', async (req, res) => {
+app.get('/api/admin/usernames', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const connection = await connectDB();
     const User = connection.models.User || connection.model('User', userSchema);
@@ -329,7 +385,7 @@ app.get('/api/admin/usernames', async (req, res) => {
 });
 
 // Add Username
-app.post('/api/admin/add', async (req, res) => {
+app.post('/api/admin/add', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const { username } = req.body;
     if (!username) return res.status(400).json({ error: 'Username is required' });
@@ -348,7 +404,7 @@ app.post('/api/admin/add', async (req, res) => {
 });
 
 // Delete Username
-app.delete('/api/admin/delete', async (req, res) => {
+app.delete('/api/admin/delete', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const { username } = req.body;
     const connection = await connectDB();
@@ -361,7 +417,7 @@ app.delete('/api/admin/delete', async (req, res) => {
 });
 
 // Reset Username
-app.post('/api/admin/reset', async (req, res) => {
+app.post('/api/admin/reset', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const { username } = req.body;
     const connection = await connectDB();
@@ -374,7 +430,7 @@ app.post('/api/admin/reset', async (req, res) => {
 });
 
 // Get Stats
-app.get('/api/admin/stats', async (req, res) => {
+app.get('/api/admin/stats', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const connection = await connectDB();
     const User = connection.models.User || connection.model('User', userSchema);

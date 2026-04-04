@@ -59,6 +59,8 @@ export default async function handler(req, res) {
 
     // Parse query parameters with bounds checking
     const { page = 1, limit = 20, search = '', filter = 'all' } = req.query;
+    const limitInt = Math.min(parseInt(limit) || 20, 100);
+    const skip = (parseInt(page) - 1) * limitInt;
     // Cap limit to max 100 (R-11)
     const boundedLimit = Math.min(parseInt(limit) || 20, 100);
     const skip = (parseInt(page) - 1) * boundedLimit;
@@ -67,6 +69,8 @@ export default async function handler(req, res) {
     const query = {};
     
     if (search) {
+      // Escape special regex characters to prevent ReDoS
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Escape regex to prevent ReDoS (R-07)
       const escapedSearch = escapeRegex(search);
       query.username = { $regex: escapedSearch, $options: 'i' };
@@ -82,11 +86,13 @@ export default async function handler(req, res) {
     const usernames = await User.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
+      .limit(limitInt)
       .limit(boundedLimit)
       .select('username isGenerated createdAt')
       .lean();
 
     const total = await User.countDocuments(query);
+    const totalPages = Math.ceil(total / limitInt);
     const totalPages = Math.ceil(total / boundedLimit);
 
     return res.status(200).json({
@@ -94,6 +100,7 @@ export default async function handler(req, res) {
       pagination: {
         total,
         page: parseInt(page),
+        limit: limitInt,
         limit: boundedLimit,
         totalPages
       }

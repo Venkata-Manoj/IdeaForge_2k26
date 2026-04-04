@@ -1,6 +1,7 @@
 // API endpoint to generate certificate
 import { connectToDatabase } from './_lib/db.js';
 import { generateCertificate } from './_lib/pdfGenerator.js';
+import { randomBytes } from 'crypto';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from './_lib/rateLimit.js';
 import crypto from 'crypto';
 
@@ -37,6 +38,15 @@ export default async function handler(req, res) {
 
     const normalizedUsername = username.toLowerCase().trim();
 
+    // Validate username format
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+    if (!usernameRegex.test(normalizedUsername)) {
+      return res.status(400).json({ 
+        error: 'Invalid username format', 
+        details: { username: 'Only letters, numbers, and underscores allowed (3-30 characters)' }
+      });
+    }
+
     // Validate name format (alphabets and spaces only, 2-50 chars)
     const nameRegex = /^[a-zA-Z\s]{2,50}$/;
     if (!nameRegex.test(name)) {
@@ -58,6 +68,9 @@ export default async function handler(req, res) {
     const db = await connectToDatabase();
     const User = db.model('User');
     const Certificate = db.model('Certificate');
+
+    // Validate username exists and is available
+    const user = await User.findOne({ username: normalizedUsername });
 
     // Validate username format
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
@@ -88,6 +101,10 @@ export default async function handler(req, res) {
     user.isGenerated = true;
     await user.save();
 
+    // Generate unique certificate ID using CSPRNG (3 bytes = 6 hex chars per segment)
+    const part1 = randomBytes(3).toString('hex').toUpperCase();
+    const part2 = randomBytes(3).toString('hex').toUpperCase();
+    const certificateId = `IF2K26-${part1}-${part2}`;
     // Generate unique certificate ID using cryptographically secure RNG
     const certIdPart1 = crypto.randomBytes(3).toString('hex').toUpperCase();
     const certIdPart2 = crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -101,6 +118,12 @@ export default async function handler(req, res) {
       eventDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     });
 
+    // Sanitize IP: take only the first (client) IP from the forwarded chain
+    const rawForwardedFor = req.headers['x-forwarded-for'];
+    const ipAddress = rawForwardedFor
+      ? rawForwardedFor.split(',')[0].trim()
+      : req.socket?.remoteAddress;
+
     // Store certificate record in database
     // Get first IP from X-Forwarded-For chain
     const forwardedFor = req.headers['x-forwarded-for'];
@@ -112,6 +135,7 @@ export default async function handler(req, res) {
       participantName: name,
       eventType: eventType,
       generatedAt: new Date(),
+      ipAddress,
       ipAddress: clientIPAddr,
       userAgent: req.headers['user-agent'] || ''
     });
