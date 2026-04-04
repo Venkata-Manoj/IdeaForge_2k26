@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Navbar } from './components/Layout/Navbar';
 import { Footer } from './components/Layout/Footer';
 import { Hero } from './components/Hero/Hero';
@@ -8,7 +8,10 @@ import { CertificateForm } from './components/CertificateForm/CertificateForm';
 import { CertificatePreview } from './components/CertificatePreview/CertificatePreview';
 import { MobileBlocker } from './components/UI/MobileBlocker';
 import { Confetti } from './components/UI/Confetti';
-import { generateCertificate } from './services/api';
+import { AdminLogin } from './components/Admin/AdminLogin';
+import { StatsCards, UsernameTable, BulkUpload } from './components/Admin/AdminDashboard';
+import { Button } from './components/UI/Button';
+import { generateCertificate, adminLogin, getAdminStats, getUsernames, uploadCSV, deleteUsername, resetUsername, type AdminStats, type Username } from './services/api';
 import './index.css';
 
 interface CertificateData {
@@ -139,11 +142,150 @@ function NotFound() {
   );
 }
 
+// Admin Page Component
+function AdminPage() {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [usernames, setUsernames] = useState<Username[]>([]);
+
+  const loadStats = async () => {
+    const data = await getAdminStats();
+    if (data) setStats(data);
+  };
+
+  const loadUsernames = async () => {
+    const data = await getUsernames();
+    if (data) setUsernames(data.usernames);
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    let mounted = true;
+    
+    const fetchData = async () => {
+      const statsData = await getAdminStats();
+      const usernamesData = await getUsernames();
+      
+      if (!mounted) return;
+      
+      if (statsData) setStats(statsData);
+      if (usernamesData) setUsernames(usernamesData.usernames);
+    };
+    
+    fetchData();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated]);
+
+  const handleLogin = async (password: string): Promise<boolean> => {
+    const result = await adminLogin(password);
+    if (result.success) {
+      setIsAuthenticated(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUpload = async (file: File): Promise<void> => {
+    setIsLoading(true);
+    const result = await uploadCSV(file);
+    setIsLoading(false);
+    if (result) {
+      alert(`Upload complete: ${result.added} added, ${result.skipped} skipped`);
+      loadUsernames();
+      loadStats();
+    } else {
+      alert('Upload failed');
+    }
+  };
+
+  const handleDelete = async (username: string): Promise<void> => {
+    if (confirm(`Delete ${username}?`)) {
+      const success = await deleteUsername(username);
+      if (success) {
+        loadUsernames();
+        loadStats();
+      }
+    }
+  };
+
+  const handleReset = async (username: string): Promise<void> => {
+    if (confirm(`Reset ${username}?`)) {
+      const success = await resetUsername(username);
+      if (success) {
+        loadUsernames();
+        loadStats();
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setStats(null);
+    setUsernames([]);
+    navigate('/');
+  };
+
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      padding: '100px 40px 40px',
+      background: '#080808',
+    }}>
+      <Navbar />
+      
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '32px',
+        }}>
+          <h1 style={{
+            fontFamily: "'Unbounded', sans-serif",
+            fontSize: '28px',
+            fontWeight: 700,
+            color: '#F5EFE0',
+          }}>
+            Admin Dashboard
+          </h1>
+          <Button variant="secondary" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+
+        {stats && <StatsCards stats={stats} />}
+
+        <div style={{ marginBottom: '32px' }}>
+          <BulkUpload onUpload={handleUpload} isLoading={isLoading} />
+        </div>
+
+        <UsernameTable
+          usernames={usernames}
+          onDelete={handleDelete}
+          onReset={handleReset}
+          isLoading={isLoading}
+        />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<MainPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
