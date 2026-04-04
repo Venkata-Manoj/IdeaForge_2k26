@@ -354,7 +354,8 @@ app.post('/api/admin/login', rateLimit(15 * 60 * 1000, 10), async (req, res) => 
     if (!password) {
       return res.status(400).json({ error: 'Password is required' });
     }
-    // Use bcrypt compare when ADMIN_PASSWORD is stored as a hash
+    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison.
+    // To migrate to bcrypt: set ADMIN_PASSWORD to the output of bcrypt.hashSync('yourpassword', 12)
     const isBcryptHash = /^\$2[aby]\$/.test(ADMIN_PASSWORD);
     const isValid = isBcryptHash
       ? await bcrypt.compare(password, ADMIN_PASSWORD)

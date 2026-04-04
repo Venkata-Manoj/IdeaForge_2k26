@@ -21,7 +21,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Password is required' });
     }
 
-    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison
+    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison.
+    // To migrate to bcrypt: set ADMIN_PASSWORD to the output of bcrypt.hashSync('yourpassword', 12)
     const isBcryptHash = /^\$2[aby]\$/.test(ADMIN_PASSWORD);
     const isValid = isBcryptHash
       ? await bcrypt.compare(password, ADMIN_PASSWORD)
