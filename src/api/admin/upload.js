@@ -51,11 +51,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Parse multipart form data with file size limit (R-10)
+    // Parse multipart form data with file size limit (512KB max)
     const { default: Busboy } = await import('busboy');
-    const { Writable } = await import('stream');
-    
-    const bb = Busboy({ headers: req.headers, limits: { fileSize: 1024 * 1024 } }); // 1 MB max
+
     const bb = Busboy({ 
       headers: req.headers,
       limits: {

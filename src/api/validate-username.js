@@ -28,14 +28,6 @@ export default async function handler(req, res) {
 
     const normalizedUsername = username.toLowerCase().trim();
 
-    const db = await connectToDatabase();
-    const User = db.model('User');
-    
-    // Find user by username (case-insensitive)
-    const user = await User.findOne({ 
-      username: normalizedUsername
-    });
-
     // Validate username format
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
     if (!usernameRegex.test(normalizedUsername)) {
@@ -48,7 +40,7 @@ export default async function handler(req, res) {
     const db = await connectToDatabase();
     const User = db.model('User');
     
-    // Find user by username
+    // Find user by username (case-insensitive)
     const user = await User.findOne({ username: normalizedUsername });
 
     if (!user) {

@@ -2,6 +2,7 @@
 // Note: For production serverless deployments, use Redis/Vercel KV for shared state
 
 const rateLimitStore = new Map();
+const lockoutStore = new Map();
 
 // Clean up old entries every 5 minutes
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
@@ -11,6 +12,11 @@ function cleanupOldEntries() {
   for (const [key, data] of rateLimitStore.entries()) {
     if (now - data.resetTime > CLEANUP_INTERVAL) {
       rateLimitStore.delete(key);
+    }
+  }
+  for (const [key, data] of lockoutStore.entries()) {
+    if (now > data.lockedUntil) {
+      lockoutStore.delete(key);
     }
   }
 }
@@ -58,6 +64,65 @@ export function checkRateLimit(key, maxRequests, windowMs) {
     remaining: maxRequests - record.count,
     resetTime: record.resetTime,
   };
+}
+
+/**
+ * Check brute-force lockout for a given key.
+ * Tracks consecutive failures. After maxFailures within windowMs, locks out
+ * for lockoutDurationMs. Call recordFailure() on failed attempts and
+ * clearFailures() on success.
+ * @param {string} key - Unique identifier (e.g., "login:" + IP)
+ * @returns {object} - { locked: boolean, remainingMs: number }
+ */
+export function checkLockout(key) {
+  const now = Date.now();
+  const lockout = lockoutStore.get(key);
+
+  if (lockout && now < lockout.lockedUntil) {
+    return {
+      locked: true,
+      remainingMs: lockout.lockedUntil - now,
+    };
+  }
+
+  // Expired lockout, clean up
+  if (lockout && now >= lockout.lockedUntil) {
+    lockoutStore.delete(key);
+  }
+
+  return { locked: false, remainingMs: 0 };
+}
+
+/**
+ * Record a failed attempt. If failures exceed threshold, engage lockout.
+ * @param {string} key - Unique identifier
+ * @param {number} maxFailures - Max failures before lockout (default: 5)
+ * @param {number} windowMs - Window to count failures (default: 15 min)
+ * @param {number} lockoutDurationMs - How long to lock out (default: 15 min)
+ */
+export function recordFailure(key, maxFailures = 5, windowMs = 15 * 60 * 1000, lockoutDurationMs = 15 * 60 * 1000) {
+  const now = Date.now();
+  let record = lockoutStore.get(key);
+
+  if (!record || now > record.windowEnd) {
+    record = { failures: 1, windowEnd: now + windowMs, lockedUntil: 0 };
+  } else {
+    record.failures++;
+  }
+
+  if (record.failures >= maxFailures) {
+    record.lockedUntil = now + lockoutDurationMs;
+  }
+
+  lockoutStore.set(key, record);
+}
+
+/**
+ * Clear failures on successful action (e.g., successful login).
+ * @param {string} key - Unique identifier
+ */
+export function clearFailures(key) {
+  lockoutStore.delete(key);
 }
 
 /**

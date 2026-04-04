@@ -1,10 +1,20 @@
 // API endpoint to download certificate by ID
 import { connectToDatabase } from './_lib/db.js';
 import { generateCertificate } from './_lib/pdfGenerator.js';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from './_lib/rateLimit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Apply rate limiting to prevent certificate ID enumeration
+  const clientIP = getClientIP(req);
+  const rateLimitKey = `download-certificate:${clientIP}`;
+  const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.PUBLIC.maxRequests, RATE_LIMITS.PUBLIC.windowMs);
+
+  if (!rateLimit.allowed) {
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
   try {
@@ -12,6 +22,12 @@ export default async function handler(req, res) {
 
     if (!id || typeof id !== 'string') {
       return res.status(400).json({ error: 'Certificate ID is required' });
+    }
+
+    // Validate certificate ID format to prevent injection
+    const certIdRegex = /^IF2K26-[A-F0-9]{6}-[A-F0-9]{6}$/;
+    if (!certIdRegex.test(id)) {
+      return res.status(400).json({ error: 'Invalid certificate ID format' });
     }
 
     const db = await connectToDatabase();

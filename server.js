@@ -33,7 +33,7 @@ if (fs.existsSync(localEnvPath)) {
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const app = express();
@@ -348,25 +348,21 @@ app.post('/api/generate-certificate', rateLimit(15 * 60 * 1000, 30), async (req,
 app.post('/api/admin/login', rateLimit(15 * 60 * 1000, 10), async (req, res) => {
   try {
     const { password } = req.body;
-    if (!JWT_SECRET || !ADMIN_PASSWORD) {
+    if (!JWT_SECRET || !ADMIN_PASSWORD_HASH) {
       return res.status(500).json({ error: 'Server misconfigured' });
     }
     if (!password) {
       return res.status(400).json({ error: 'Password is required' });
     }
-    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison.
-    // To migrate to bcrypt: set ADMIN_PASSWORD to the output of bcrypt.hashSync('yourpassword', 12)
-    const isBcryptHash = /^\$2[aby]\$/.test(ADMIN_PASSWORD);
-    const isValid = isBcryptHash
-      ? await bcrypt.compare(password, ADMIN_PASSWORD)
-      : password === ADMIN_PASSWORD;
+    // Verify password using bcrypt (no plaintext fallback)
+    const isValid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid password' });
     }
     const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
     const securePart = process.env.NODE_ENV === 'production' ? '; Secure' : '';
     res.setHeader('Set-Cookie', `admin_token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict${securePart}`);
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ success: true, expiresIn: '24h' });
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }
