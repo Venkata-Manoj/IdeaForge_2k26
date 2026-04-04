@@ -40,13 +40,16 @@ export default async function handler(req, res) {
 
     // Parse query parameters
     const { page = 1, limit = 20, search = '', filter = 'all' } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitInt = Math.min(parseInt(limit) || 20, 100);
+    const skip = (parseInt(page) - 1) * limitInt;
 
     // Build query
     const query = {};
     
     if (search) {
-      query.username = { $regex: search, $options: 'i' };
+      // Escape special regex characters to prevent ReDoS
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.username = { $regex: escapedSearch, $options: 'i' };
     }
     
     if (filter === 'generated') {
@@ -59,19 +62,19 @@ export default async function handler(req, res) {
     const usernames = await User.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit))
+      .limit(limitInt)
       .select('username isGenerated createdAt')
       .lean();
 
     const total = await User.countDocuments(query);
-    const totalPages = Math.ceil(total / parseInt(limit));
+    const totalPages = Math.ceil(total / limitInt);
 
     return res.status(200).json({
       usernames,
       pagination: {
         total,
         page: parseInt(page),
-        limit: parseInt(limit),
+        limit: limitInt,
         totalPages
       }
     });

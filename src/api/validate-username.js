@@ -15,34 +15,20 @@ export default async function handler(req, res) {
 
     const normalizedUsername = username.toLowerCase().trim();
 
-    const db = await connectToDatabase();
-    const User = db.model('User');
-    
-    // Find user by username (case-insensitive)
-    const user = await User.findOne({ 
-      username: normalizedUsername
-    });
-
-    // Check if user exists and get isAdmin status
-    const isAdmin = user && user.isAdmin;
-
-    // Admin usernames bypass all checks
-    if (isAdmin) {
-      return res.status(200).json({ 
-        valid: true, 
-        message: 'Admin username - unlimited certificates',
-        isAdmin: true
-      });
-    }
-
-    // Validate username format for non-admin
+    // Validate username format
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-    if (!usernameRegex.test(username)) {
+    if (!usernameRegex.test(normalizedUsername)) {
       return res.status(400).json({ 
         valid: false, 
         error: 'Only letters, numbers, and underscores allowed (3-30 characters)' 
       });
     }
+
+    const db = await connectToDatabase();
+    const User = db.model('User');
+    
+    // Find user by username
+    const user = await User.findOne({ username: normalizedUsername });
 
     if (!user) {
       return res.status(404).json({ 

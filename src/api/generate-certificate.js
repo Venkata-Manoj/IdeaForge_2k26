@@ -1,6 +1,7 @@
 // API endpoint to generate certificate
 import { connectToDatabase } from './_lib/db.js';
 import { generateCertificate } from './_lib/pdfGenerator.js';
+import { randomBytes } from 'crypto';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,6 +25,15 @@ export default async function handler(req, res) {
 
     const normalizedUsername = username.toLowerCase().trim();
 
+    // Validate username format
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+    if (!usernameRegex.test(normalizedUsername)) {
+      return res.status(400).json({ 
+        error: 'Invalid username format', 
+        details: { username: 'Only letters, numbers, and underscores allowed (3-30 characters)' }
+      });
+    }
+
     // Validate name format (alphabets and spaces only, 2-50 chars)
     const nameRegex = /^[a-zA-Z\s]{2,50}$/;
     if (!nameRegex.test(name)) {
@@ -46,52 +56,9 @@ export default async function handler(req, res) {
     const User = db.model('User');
     const Certificate = db.model('Certificate');
 
-    // Find user and check admin status
+    // Validate username exists and is available
     const user = await User.findOne({ username: normalizedUsername });
-    const isAdmin = user && user.isAdmin;
 
-    // Validate username format for non-admin
-    if (!isAdmin) {
-      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-      if (!usernameRegex.test(username)) {
-        return res.status(400).json({ 
-          error: 'Invalid username format', 
-          details: { username: 'Invalid username format' }
-        });
-      }
-    }
-
-    // Admin usernames bypass isGenerated check
-    if (isAdmin) {
-      // Admin can generate multiple certificates without limits
-      const certificateId = `IF2K26-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-
-      const pdfBytes = await generateCertificate({
-        participantName: name,
-        eventType: eventType,
-        certificateId: certificateId,
-        eventDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-      });
-
-      await Certificate.create({
-        certificateId,
-        username: normalizedUsername,
-        participantName: name,
-        eventType: eventType,
-        generatedAt: new Date(),
-        ipAddress: req.headers['x-forwarded-for'] || req.socket?.remoteAddress,
-        userAgent: req.headers['user-agent'] || ''
-      });
-
-      res.setHeader('Content-Type', 'application/pdf');
-      const safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
-      res.setHeader('Content-Disposition', `attachment; filename="IDEAFORGE2k26_${safeName}_Certificate.pdf"`);
-      res.setHeader('X-Certificate-ID', certificateId);
-
-      return res.status(200).send(pdfBytes);
-    }
-
-    // Validate username exists and is available (for non-admin)
     if (!user) {
       return res.status(404).json({ 
         error: 'Username not found. Please contact admin.' 
@@ -108,8 +75,10 @@ export default async function handler(req, res) {
     user.isGenerated = true;
     await user.save();
 
-    // Generate unique certificate ID
-    const certificateId = `IF2K26-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    // Generate unique certificate ID using CSPRNG
+    const part1 = randomBytes(2).toString('hex').toUpperCase();
+    const part2 = randomBytes(2).toString('hex').toUpperCase();
+    const certificateId = `IF2K26-${part1}-${part2}`;
 
     // Generate PDF certificate
     const pdfBytes = await generateCertificate({
@@ -119,6 +88,12 @@ export default async function handler(req, res) {
       eventDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     });
 
+    // Sanitize IP: take only the first (client) IP from the forwarded chain
+    const rawForwardedFor = req.headers['x-forwarded-for'];
+    const ipAddress = rawForwardedFor
+      ? rawForwardedFor.split(',')[0].trim()
+      : req.socket?.remoteAddress;
+
     // Store certificate record in database
     await Certificate.create({
       certificateId,
@@ -126,7 +101,7 @@ export default async function handler(req, res) {
       participantName: name,
       eventType: eventType,
       generatedAt: new Date(),
-      ipAddress: req.headers['x-forwarded-for'] || req.socket?.remoteAddress,
+      ipAddress,
       userAgent: req.headers['user-agent'] || ''
     });
 

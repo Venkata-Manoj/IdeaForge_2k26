@@ -22,8 +22,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Password is required' });
     }
 
-    // Simple password check using environment variable
-    if (password !== ADMIN_PASSWORD) {
+    // Compare using bcrypt when ADMIN_PASSWORD is stored as a hash, otherwise plain comparison
+    const isBcryptHash = /^\$2[aby]\$/.test(ADMIN_PASSWORD);
+    const isValid = isBcryptHash
+      ? await bcrypt.compare(password, ADMIN_PASSWORD)
+      : password === ADMIN_PASSWORD;
+
+    if (!isValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -34,13 +39,11 @@ export default async function handler(req, res) {
       { expiresIn: '24h' }
     );
 
-    // Set HTTP-only cookie
-    res.setHeader('Set-Cookie', `admin_token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
+    // Set HTTP-only cookie; add Secure flag in production
+    const securePart = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    res.setHeader('Set-Cookie', `admin_token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict${securePart}`);
 
-    return res.status(200).json({
-      token,
-      expiresIn: '24h'
-    });
+    return res.status(200).json({ message: 'Login successful' });
 
   } catch (error) {
     console.error('Admin login error:', error);
