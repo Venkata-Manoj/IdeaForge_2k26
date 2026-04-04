@@ -2,6 +2,12 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
+// Axios instance with credentials for cookies
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+
 export interface GenerateCertificateResponse {
   success: boolean;
   certificateId?: string;
@@ -59,5 +65,109 @@ export const validateUsername = async (username: string): Promise<ValidateUserna
       return error.response.data;
     }
     return { valid: false, error: 'Network error. Please try again.' };
+  }
+};
+
+// Admin API Functions
+
+export interface AdminLoginResponse {
+  success: boolean;
+  expiresIn?: string;
+  error?: string;
+}
+
+export const adminLogin = async (password: string): Promise<AdminLoginResponse> => {
+  try {
+    const response = await apiClient.post('/api/admin/login', { password });
+    if (response.status === 200) {
+      return { success: true, expiresIn: response.data.expiresIn };
+    }
+    return { success: false, error: 'Login failed' };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { success: false, error: error.response.data.error || 'Invalid credentials' };
+    }
+    return { success: false, error: 'Network error. Please try again.' };
+  }
+};
+
+export interface AdminStats {
+  totalUsernames: number;
+  certificatesGenerated: number;
+  remaining: number;
+  generationRate: string;
+  recentGenerations?: Array<{
+    username: string;
+    name: string;
+    eventType: string;
+    time: string;
+  }>;
+}
+
+export const getAdminStats = async (): Promise<AdminStats | null> => {
+  try {
+    const response = await apiClient.get('/api/admin/stats');
+    return response.data;
+  } catch {
+    return null;
+  }
+};
+
+export interface Username {
+  username: string;
+  isGenerated: boolean;
+  createdAt: string;
+}
+
+export interface UsernamesResponse {
+  usernames: Username[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export const getUsernames = async (page = 1, limit = 20): Promise<UsernamesResponse | null> => {
+  try {
+    const response = await apiClient.get(`/api/admin/usernames?page=${page}&limit=${limit}`);
+    return response.data;
+  } catch {
+    return null;
+  }
+};
+
+export const uploadCSV = async (file: File): Promise<{ added: number; skipped: number; errors: string[] } | null> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await apiClient.post('/api/admin/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch {
+    return null;
+  }
+};
+
+export const deleteUsername = async (username: string): Promise<boolean> => {
+  try {
+    await apiClient.delete('/api/admin/delete', { data: { username } });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const resetUsername = async (username: string): Promise<boolean> => {
+  try {
+    await apiClient.post('/api/admin/reset', { username });
+    return true;
+  } catch {
+    return false;
   }
 };

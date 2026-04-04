@@ -1,9 +1,22 @@
 // API endpoint to validate username
 import { connectToDatabase } from './_lib/db.js';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from './_lib/rateLimit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ valid: false, error: 'Method not allowed' });
+  }
+
+  // Apply rate limiting
+  const clientIP = getClientIP(req);
+  const rateLimitKey = `validate-username:${clientIP}`;
+  const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.PUBLIC.maxRequests, RATE_LIMITS.PUBLIC.windowMs);
+
+  if (!rateLimit.allowed) {
+    return res.status(429).json({
+      valid: false,
+      error: 'Too many requests. Please try again later.',
+    });
   }
 
   try {
@@ -14,6 +27,14 @@ export default async function handler(req, res) {
     }
 
     const normalizedUsername = username.toLowerCase().trim();
+
+    const db = await connectToDatabase();
+    const User = db.model('User');
+    
+    // Find user by username (case-insensitive)
+    const user = await User.findOne({ 
+      username: normalizedUsername
+    });
 
     // Validate username format
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;

@@ -2,10 +2,23 @@
 import { connectToDatabase } from './_lib/db.js';
 import { generateCertificate } from './_lib/pdfGenerator.js';
 import { randomBytes } from 'crypto';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from './_lib/rateLimit.js';
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Apply rate limiting
+  const clientIP = getClientIP(req);
+  const rateLimitKey = `generate-certificate:${clientIP}`;
+  const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.PUBLIC.maxRequests, RATE_LIMITS.PUBLIC.windowMs);
+
+  if (!rateLimit.allowed) {
+    return res.status(429).json({
+      error: 'Too many requests. Please try again later.',
+    });
   }
 
   try {
@@ -59,6 +72,19 @@ export default async function handler(req, res) {
     // Validate username exists and is available
     const user = await User.findOne({ username: normalizedUsername });
 
+    // Validate username format
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({ 
+        error: 'Invalid username format', 
+        details: { username: 'Invalid username format' }
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ username: normalizedUsername });
+
+    // Validate username exists and is available
     if (!user) {
       return res.status(404).json({ 
         error: 'Username not found. Please contact admin.' 
@@ -79,6 +105,10 @@ export default async function handler(req, res) {
     const part1 = randomBytes(3).toString('hex').toUpperCase();
     const part2 = randomBytes(3).toString('hex').toUpperCase();
     const certificateId = `IF2K26-${part1}-${part2}`;
+    // Generate unique certificate ID using cryptographically secure RNG
+    const certIdPart1 = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const certIdPart2 = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const certificateId = `IF2K26-${certIdPart1}-${certIdPart2}`;
 
     // Generate PDF certificate
     const pdfBytes = await generateCertificate({
@@ -95,6 +125,10 @@ export default async function handler(req, res) {
       : req.socket?.remoteAddress;
 
     // Store certificate record in database
+    // Get first IP from X-Forwarded-For chain
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const clientIPAddr = forwardedFor ? forwardedFor.split(',')[0].trim() : req.socket?.remoteAddress;
+
     await Certificate.create({
       certificateId,
       username: normalizedUsername,
@@ -102,6 +136,7 @@ export default async function handler(req, res) {
       eventType: eventType,
       generatedAt: new Date(),
       ipAddress,
+      ipAddress: clientIPAddr,
       userAgent: req.headers['user-agent'] || ''
     });
 

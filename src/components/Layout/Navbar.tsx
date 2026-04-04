@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export const Navbar: React.FC = () => {
   return (
@@ -49,23 +50,52 @@ export const Navbar: React.FC = () => {
         </span>
       </div>
       
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '8px 16px',
-        background: 'rgba(255, 255, 255, 0.03)',
-        borderRadius: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-      }}>
-        <span style={{ fontSize: '14px' }}>💻</span>
-        <span style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: '12px',
-          color: '#6B6B6B',
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 16px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
         }}>
-          Desktop Only
-        </span>
+          <span style={{ fontSize: '14px' }}>💻</span>
+          <span style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '12px',
+            color: '#6B6B6B',
+          }}>
+            Desktop Only
+          </span>
+        </div>
+
+        <Link to="/admin" style={{ textDecoration: 'none' }}>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              background: 'rgba(255, 85, 0, 0.1)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 85, 0, 0.3)',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '14px' }}>🛡️</span>
+            <span style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: '12px',
+              color: '#FF5500',
+              fontWeight: 500,
+            }}>
+              Admin
+            </span>
+          </motion.div>
+        </Link>
       </div>
     </motion.nav>
   );

@@ -1,6 +1,7 @@
 // Reset username API endpoint
 import { connectToDatabase } from '../_lib/db.js';
 import jwt from 'jsonwebtoken';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '../_lib/rateLimit.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -20,6 +21,15 @@ export default async function handler(req, res) {
   try {
     if (!JWT_SECRET) {
       return res.status(500).json({ error: 'Server misconfigured' });
+    }
+
+    // Apply rate limiting
+    const clientIP = getClientIP(req);
+    const rateLimitKey = `admin-reset:${clientIP}`;
+    const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMITS.ADMIN.maxRequests, RATE_LIMITS.ADMIN.windowMs);
+
+    if (!rateLimit.allowed) {
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
     // Verify admin token from cookie
