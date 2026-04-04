@@ -70,7 +70,7 @@ A modern web application for generating and managing participation certificates 
    
    Edit `.env` with your values:
    ```
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ideaforge
+   MONGODB_URI = ---
    JWT_SECRET=your-super-secret-jwt-key
    ADMIN_PASSWORD=your-secure-admin-password
    VITE_API_URL=http://localhost:3001
