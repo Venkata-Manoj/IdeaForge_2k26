@@ -228,6 +228,16 @@ async function generateCertificatePDF(data) {
 
 // Simple in-memory rate limiter (per IP, for local dev server)
 const rateLimitStore = new Map();
+// Periodically prune stale entries to prevent unbounded memory growth
+setInterval(() => {
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  for (const [key, timestamps] of rateLimitStore) {
+    const fresh = timestamps.filter(t => t > cutoff);
+    if (fresh.length === 0) rateLimitStore.delete(key);
+    else rateLimitStore.set(key, fresh);
+  }
+}, 5 * 60 * 1000).unref();
+
 function rateLimit(windowMs, maxRequests) {
   return (req, res, next) => {
     const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
@@ -304,7 +314,7 @@ app.post('/api/generate-certificate', rateLimit(15 * 60 * 1000, 30), async (req,
     user.isGenerated = true;
     await user.save();
 
-    const certificateId = `IF2K26-${randomBytes(2).toString('hex').toUpperCase()}-${randomBytes(2).toString('hex').toUpperCase()}`;
+    const certificateId = `IF2K26-${randomBytes(3).toString('hex').toUpperCase()}-${randomBytes(3).toString('hex').toUpperCase()}`;
     const eventDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const pdfBytes = await generateCertificatePDF({
@@ -362,7 +372,7 @@ app.post('/api/admin/login', rateLimit(15 * 60 * 1000, 10), async (req, res) => 
 });
 
 // Get Usernames
-app.get('/api/admin/usernames', requireAdmin, async (req, res) => {
+app.get('/api/admin/usernames', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const connection = await connectDB();
     const User = connection.models.User || connection.model('User', userSchema);
@@ -374,7 +384,7 @@ app.get('/api/admin/usernames', requireAdmin, async (req, res) => {
 });
 
 // Add Username
-app.post('/api/admin/add', requireAdmin, async (req, res) => {
+app.post('/api/admin/add', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const { username } = req.body;
     if (!username) return res.status(400).json({ error: 'Username is required' });
@@ -393,7 +403,7 @@ app.post('/api/admin/add', requireAdmin, async (req, res) => {
 });
 
 // Delete Username
-app.delete('/api/admin/delete', requireAdmin, async (req, res) => {
+app.delete('/api/admin/delete', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const { username } = req.body;
     const connection = await connectDB();
@@ -406,7 +416,7 @@ app.delete('/api/admin/delete', requireAdmin, async (req, res) => {
 });
 
 // Reset Username
-app.post('/api/admin/reset', requireAdmin, async (req, res) => {
+app.post('/api/admin/reset', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const { username } = req.body;
     const connection = await connectDB();
@@ -419,7 +429,7 @@ app.post('/api/admin/reset', requireAdmin, async (req, res) => {
 });
 
 // Get Stats
-app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+app.get('/api/admin/stats', rateLimit(15 * 60 * 1000, 120), requireAdmin, async (req, res) => {
   try {
     const connection = await connectDB();
     const User = connection.models.User || connection.model('User', userSchema);

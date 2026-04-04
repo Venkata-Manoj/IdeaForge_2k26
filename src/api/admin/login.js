@@ -1,5 +1,4 @@
 // Admin login API endpoint
-import { connectToDatabase } from './_lib/db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 

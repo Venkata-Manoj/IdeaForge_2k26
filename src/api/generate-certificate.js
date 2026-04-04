@@ -75,9 +75,9 @@ export default async function handler(req, res) {
     user.isGenerated = true;
     await user.save();
 
-    // Generate unique certificate ID using CSPRNG
-    const part1 = randomBytes(2).toString('hex').toUpperCase();
-    const part2 = randomBytes(2).toString('hex').toUpperCase();
+    // Generate unique certificate ID using CSPRNG (3 bytes = 6 hex chars per segment)
+    const part1 = randomBytes(3).toString('hex').toUpperCase();
+    const part2 = randomBytes(3).toString('hex').toUpperCase();
     const certificateId = `IF2K26-${part1}-${part2}`;
 
     // Generate PDF certificate
