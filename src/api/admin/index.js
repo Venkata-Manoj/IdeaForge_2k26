@@ -30,17 +30,17 @@ const handlers = {
 };
 
 export default async function handler(req, res) {
-  // Get the path after /api/
+  // Get the path after /api/, stripping any trailing slash
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname.replace(/^\/api\//, '');
+  const path = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
 
   // Find the matching handler
-  const handler = handlers[path];
+  const routeHandler = handlers[path];
 
-  if (!handler) {
+  if (!routeHandler) {
     return res.status(404).json({ error: 'Admin endpoint not found' });
   }
 
   // Call the appropriate handler
-  return handler(req, res);
+  return routeHandler(req, res);
 }
