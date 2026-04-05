@@ -52,149 +52,76 @@ export const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, is
       initial={{ opacity: 0, y: 50 }}
       animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      style={{ 
-        padding: '80px 20px', 
-        display: isVisible ? 'block' : 'none',
-      }}
+      className="py-20 px-5"
+      style={{ display: isVisible ? 'block' : 'none' }}
     >
-      <GlassCard style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+      <GlassCard className="max-w-[800px] mx-auto text-center">
         {/* Certificate Preview Card — matches SIMATS Engineering template */}
-        <div ref={certificateRef} style={{
-          background: '#FFFFFF',
-          border: '4px solid #B89A1A',
-          borderRadius: '4px',
-          padding: '10px',
-          marginBottom: '32px',
-          position: 'relative',
-        }}>
+        <div ref={certificateRef} className="bg-white border-4 border-[#B89A1A] rounded p-2.5 mb-8 relative">
           {/* Inner border */}
-          <div style={{
-            border: '1px solid #D1B846',
-            padding: '36px 40px 28px',
-          }}>
+          <div className="border border-[#D1B846] py-9 px-10">
             {/* Logos Row - Perfectly Aligned */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '24px',
-              padding: '0 20px',
-            }}>
+            <div className="flex justify-between items-center mb-6 px-5">
               <img
                 src={logo1}
                 alt="Organization Logo 1"
                 crossOrigin="anonymous"
-                style={{
-                  height: '70px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                }}
+                className="h-[70px] w-auto object-contain"
               />
               <img
                 src={logo2}
                 alt="Organization Logo 2"
                 crossOrigin="anonymous"
-                style={{
-                  height: '70px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                }}
+                className="h-[70px] w-auto object-contain"
               />
             </div>
 
             {/* SIMATS ENGINEERING header */}
-            <h2 style={{
+            <h2 className="text-[32px] font-bold text-[#0D3880] mb-3 tracking-wider" style={{
               fontFamily: "'Times New Roman', 'Georgia', serif",
-              fontSize: '32px',
-              fontWeight: 700,
-              color: '#0D3880',
-              marginBottom: '12px',
-              letterSpacing: '2px',
             }}>
               SIMATS ENGINEERING
             </h2>
 
             {/* CERTIFICATE OF PARTICIPATION subtitle */}
-            <h3 style={{
+            <h3 className="text-lg font-bold text-[#1A4D8C] tracking-widest mb-2" style={{
               fontFamily: "'Times New Roman', 'Georgia', serif",
-              fontSize: '18px',
-              fontWeight: 700,
-              color: '#1A4D8C',
-              letterSpacing: '3px',
-              marginBottom: '8px',
             }}>
               CERTIFICATE OF PARTICIPATION
             </h3>
 
             {/* Thin decorative line */}
-            <div style={{
-              width: '80%',
-              height: '1px',
-              background: '#D1B846',
-              margin: '0 auto 28px',
-            }} />
+            <div className="w-4/5 h-px bg-[#D1B846] mx-auto mb-7" />
 
             {/* Body paragraph */}
-            <p style={{
+            <p className="text-[15px] text-[#262626] leading-8 text-left mx-auto mb-6 max-w-[620px]" style={{
               fontFamily: "'Times New Roman', 'Georgia', serif",
-              fontSize: '15px',
-              color: '#262626',
-              lineHeight: '2',
-              textAlign: 'left',
-              margin: '0 auto 24px',
-              maxWidth: '620px',
             }}>
-              This is to certify that <strong style={{ color: '#000', fontSize: '16px' }}>{data.name}</strong> has actively participated in
+              This is to certify that <strong className="text-black text-base">{data.name}</strong> has actively participated in
               the <strong>{"\u201C"}IDEAFORGE 2K26{"\u201D"}</strong> organized by <strong>{"\u201C"}SIMATS Engineering Passion Pitch Club {"\u201D"}</strong> as
               a contributor in the {data.eventType} activity. Your innovation and initiative reflect the spirit of building ideas that shape the future.
             </p>
 
             {/* Bottom section: Date/Venue (left) | Signature (right) */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              marginTop: '32px',
+            <div className="flex justify-between items-end mt-8 text-[13px] text-[#262626]" style={{
               fontFamily: "'Times New Roman', 'Georgia', serif",
-              fontSize: '13px',
-              color: '#262626',
             }}>
               {/* Date & Venue */}
-              <div style={{ textAlign: 'left' }}>
-                <p style={{ margin: '0 0 4px' }}>
-                  <strong>Date:</strong> 20/03/26
-                </p>
-                <p style={{ margin: 0 }}>
-                  <strong>Venue:</strong> SIMATS ENGINEERING
-                </p>
+              <div className="text-left">
+                <p className="mb-1"><strong>Date:</strong> 20/03/26</p>
+                <p className="m-0"><strong>Venue:</strong> SIMATS ENGINEERING</p>
               </div>
 
               {/* Head of Department signature */}
-              <div style={{ textAlign: 'center', minWidth: '200px' }}>
+              <div className="text-center min-w-[200px]">
                 <img
                   src={signature}
                   alt="HOD Signature"
                   crossOrigin="anonymous"
-                  style={{
-                    height: '70px',
-                    width: 'auto',
-                    objectFit: 'contain',
-                    marginBottom: '2px',
-                    marginLeft: '20px',
-                  }}
+                  className="h-[70px] w-auto object-contain mb-0.5 ml-5"
                 />
-                <div style={{
-                  borderBottom: '1px solid #262626',
-                  marginBottom: '6px',
-                  width: '160px',
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                }} />
-                <p style={{
-                  margin: 0,
-                  fontStyle: 'italic',
-                  fontSize: '13px',
-                }}>
+                <div className="border-b border-[#262626] mb-1.5 w-40 mx-auto" />
+                <p className="m-0 italic text-[13px]">
                   Head of the Department
                 </p>
               </div>
@@ -202,35 +129,19 @@ export const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, is
           </div>
         </div>
 
-        <p style={{
+        <p className="text-sm text-gray-500 mt-6 mb-4" style={{
           fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: '14px',
-          color: '#6B6B6B',
-          marginTop: '24px',
-          marginBottom: '16px',
         }}>
           Certificate generated successfully!
         </p>
 
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '16px',
-          flexWrap: 'wrap',
-          marginTop: '24px',
-        }}>
+        <div className="flex justify-center gap-4 flex-wrap mt-6">
           <Button onClick={() => window.open('https://passion-pitch-connect.netlify.app', '_blank')}>
             CONNECT WITH COORDINATORS
           </Button>
         </div>
 
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '16px',
-          flexWrap: 'wrap',
-          marginTop: '16px',
-        }}>
+        <div className="flex justify-center gap-4 flex-wrap mt-4">
           <Button onClick={handleDownload}>
             ⬇ DOWNLOAD CERTIFICATE
           </Button>

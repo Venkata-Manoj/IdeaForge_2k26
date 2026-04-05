@@ -8,89 +8,40 @@ export const Navbar: React.FC = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        padding: '20px 40px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: 'rgba(8, 8, 8, 0.8)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-        zIndex: 100,
-      }}
+      className="fixed top-0 left-0 right-0 py-5 px-10 flex justify-between items-center bg-bg-primary/80 backdrop-blur-md border-b border-white/5 z-100"
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          background: 'linear-gradient(135deg, #FF5500, #FF6A1A)',
-          borderRadius: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center font-bold text-lg text-bg-primary" style={{
           fontFamily: "'Unbounded', sans-serif",
-          fontWeight: 700,
-          fontSize: '18px',
-          color: '#080808',
         }}>
           IF
         </div>
-        <span style={{
+        <span className="text-lg font-semibold text-[#F5EFE0] tracking-wider" style={{
           fontFamily: "'Unbounded', sans-serif",
-          fontSize: '18px',
-          fontWeight: 600,
-          color: '#F5EFE0',
-          letterSpacing: '1px',
         }}>
-          IDEAFORGE <span style={{ color: '#FF5500' }}>2k26</span>
+          IDEAFORGE <span className="text-primary">2k26</span>
         </span>
       </div>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '8px 16px',
-          background: 'rgba(255, 255, 255, 0.03)',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-        }}>
-          <span style={{ fontSize: '14px' }}>💻</span>
-          <span style={{
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 py-2 px-4 bg-white/3 rounded-[20px] border border-white/8">
+          <span className="text-sm">💻</span>
+          <span className="text-xs text-gray-500" style={{
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: '12px',
-            color: '#6B6B6B',
           }}>
             Desktop Only
           </span>
         </div>
 
-        <Link to="/admin" style={{ textDecoration: 'none' }}>
+        <Link to="/admin" className="no-underline">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              background: 'rgba(255, 85, 0, 0.1)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 85, 0, 0.3)',
-              cursor: 'pointer',
-            }}
+            className="flex items-center gap-1.5 py-2 px-4 bg-primary/10 rounded-[20px] border border-primary/30 cursor-pointer"
           >
-            <span style={{ fontSize: '14px' }}>🛡️</span>
-            <span style={{
+            <span className="text-sm">🛡️</span>
+            <span className="text-xs text-primary font-medium" style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: '12px',
-              color: '#FF5500',
-              fontWeight: 500,
             }}>
               Admin
             </span>

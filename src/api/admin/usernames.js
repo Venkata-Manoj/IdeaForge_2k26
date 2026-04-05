@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     const User = db.model('User');
 
     // Parse query parameters with bounds checking
-    const { page = 1, limit = 20, search = '', filter = 'all' } = req.query;
+    const { page = 1, limit = 20, search = '', filter = 'all', sortBy = 'createdAt', order = 'desc' } = req.query;
     // Cap limit to max 100 (R-11)
     const boundedLimit = Math.min(parseInt(limit) || 20, 100);
     const skip = (parseInt(page) - 1) * boundedLimit;
@@ -78,9 +78,15 @@ export default async function handler(req, res) {
       query.isGenerated = false;
     }
 
+    // Build sort object
+    const sortObj = {};
+    const validSortFields = ['username', 'createdAt', 'isGenerated'];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    sortObj[sortField] = order === 'asc' ? 1 : -1;
+
     // Get usernames with pagination
     const usernames = await User.find(query)
-      .sort({ createdAt: -1 })
+      .sort(sortObj)
       .skip(skip)
       .limit(boundedLimit)
       .select('username isGenerated createdAt')

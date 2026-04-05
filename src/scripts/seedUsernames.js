@@ -61,13 +61,14 @@ for (let i = 1; i <= 500; i++) {
   sampleUsernames.push(`participant_${i.toString().padStart(3, '0')}`);
 }
 
-// Admin usernames - unlimited certificates
-const adminUsernames = [
-  'admin_ideaforge_200326',
-  'admin_event_lead',
-  'admin_tech_head',
-  'admin_nontech_head',
-];
+// Admin usernames - (read from environment variable)
+// Format: comma-separated list in ADMIN_USERNAMES env var
+// Example: ADMIN_USERNAMES=admin1,admin2,admin3
+const adminUsernamesEnv = process.env.ADMIN_USERNAMES || '';
+const adminUsernames = adminUsernamesEnv
+  .split(',')
+  .map(u => u.trim())
+  .filter(u => u.length > 0);
 
 async function seedUsernames() {
   try {

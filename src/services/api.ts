@@ -129,12 +129,24 @@ export interface UsernamesResponse {
   };
 }
 
-export const getUsernames = async (page = 1, limit = 20): Promise<UsernamesResponse | null> => {
+export const getUsernames = async (page = 1, limit = 20, sortBy = 'createdAt', order = 'desc'): Promise<UsernamesResponse | null> => {
   try {
-    const response = await apiClient.get(`/api/admin/usernames?page=${page}&limit=${limit}`);
+    const response = await apiClient.get(`/api/admin/usernames?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`);
     return response.data;
   } catch {
     return null;
+  }
+};
+
+export const addUsername = async (username: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+  try {
+    const response = await apiClient.post('/api/admin/add', { username });
+    return { success: true, message: response.data.message };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { success: false, error: error.response.data.error || 'Failed to add username' };
+    }
+    return { success: false, error: 'Network error. Please try again.' };
   }
 };
 
@@ -169,5 +181,62 @@ export const resetUsername = async (username: string): Promise<boolean> => {
     return true;
   } catch {
     return false;
+  }
+};
+
+export const updateUsername = async (oldUsername: string, newUsername: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+  try {
+    const response = await apiClient.put('/api/admin/update', { oldUsername, newUsername });
+    return { success: true, message: response.data.message };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { success: false, error: error.response.data.error || 'Failed to update username' };
+    }
+    return { success: false, error: 'Network error. Please try again.' };
+  }
+};
+
+export interface UserDetails {
+  username: string;
+  isGenerated: boolean;
+  createdAt: string;
+  updatedAt: string;
+  certificate: {
+    certificateId: string;
+    participantName: string;
+    eventType: string;
+    generatedAt: string;
+    ipAddress: string;
+  } | null;
+}
+
+export const getUserDetails = async (username: string): Promise<UserDetails | null> => {
+  try {
+    const response = await apiClient.get(`/api/admin/details?username=${encodeURIComponent(username)}`);
+    return response.data;
+  } catch {
+    return null;
+  }
+};
+
+export const downloadUsernamesCSV = async (): Promise<void> => {
+  try {
+    const response = await apiClient.get('/api/admin/download-csv', {
+      responseType: 'blob',
+    });
+    
+    // Create download link
+    const blob = new Blob([response.data], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ideaforge_usernames_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Download failed:', error);
+    alert('Failed to download CSV file');
   }
 };

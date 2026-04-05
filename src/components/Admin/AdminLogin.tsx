@@ -31,12 +31,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
+    <div className="min-h-screen flex items-center justify-center p-5" style={{
       background: 'radial-gradient(ellipse at center, rgba(255,85,0,0.05) 0%, transparent 70%)',
     }}>
       <motion.div
@@ -44,28 +39,22 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <GlassCard style={{ width: '100%', maxWidth: '400px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <h1 style={{
+        <GlassCard className="w-full max-w-[400px]">
+          <div className="text-center mb-8">
+            <h1 className="text-[28px] font-bold text-[#F5EFE0] mb-2" style={{
               fontFamily: "'Unbounded', sans-serif",
-              fontSize: '28px',
-              fontWeight: 700,
-              color: '#F5EFE0',
-              marginBottom: '8px',
             }}>
               Admin Panel
             </h1>
-            <p style={{
+            <p className="text-sm text-gray-500" style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: '14px',
-              color: '#6B6B6B',
             }}>
               Enter your credentials to access
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '24px' }}>
+            <div className="mb-6">
               <Input
                 type="password"
                 placeholder="Enter admin password"
@@ -80,20 +69,14 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
               type="submit"
               disabled={!password || isLoading}
               isLoading={isLoading}
-              style={{ width: '100%' }}
+              className="w-full"
             >
               Login
             </Button>
           </form>
 
-          <p style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: '12px',
-            color: '#444',
-            textAlign: 'center',
-            marginTop: '24px',
-          }}>
-            <a href="/" style={{ color: '#6B6B6B', textDecoration: 'none' }}>
+          <p className="text-xs text-gray-700 text-center mt-6">
+            <a href="/" className="text-gray-500 no-underline hover:text-gray-400 transition-colors">
               ← Back to Certificate Generation
             </a>
           </p>

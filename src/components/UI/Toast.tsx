@@ -42,29 +42,15 @@ export const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
+      className="fixed top-6 right-6 bg-white/5 backdrop-blur-xl border border-white/8 rounded-xl py-4 px-6 flex items-center gap-3 transition-all duration-300 z-[9999] max-w-[400px]"
       style={{
-        position: 'fixed',
-        top: '24px',
-        right: '24px',
-        background: 'rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '12px',
-        padding: '16px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
         transform: isVisible ? 'translateX(0)' : 'translateX(120%)',
         opacity: isVisible ? 1 : 0,
-        transition: 'all 0.3s ease',
-        zIndex: 9999,
-        maxWidth: '400px',
       }}
     >
-      <span style={{ fontSize: '20px' }}>{icons[type]}</span>
-      <span style={{ 
+      <span className="text-xl">{icons[type]}</span>
+      <span className="text-sm" style={{ 
         fontFamily: "'Space Grotesk', sans-serif",
-        fontSize: '14px',
         color: colors[type],
       }}>
         {message}
@@ -74,15 +60,7 @@ export const Toast: React.FC<ToastProps> = ({
           setIsVisible(false);
           setTimeout(onClose, 300);
         }}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: '#6B6B6B',
-          cursor: 'pointer',
-          fontSize: '18px',
-          padding: '4px',
-          marginLeft: '8px',
-        }}
+        className="bg-transparent border-0 text-gray-500 cursor-pointer text-lg p-1 ml-2 hover:text-gray-400 transition-colors"
       >
         ×
       </button>
@@ -101,7 +79,7 @@ interface ToastContainerProps {
 
 export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, removeToast }) => {
   return (
-    <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 9999 }}>
+    <div className="fixed top-6 right-6 z-[9999]">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

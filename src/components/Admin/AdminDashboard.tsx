@@ -21,11 +21,8 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
   ];
 
   return (
-    <div style={{
-      display: 'grid',
+    <div className="grid gap-5 mb-8" style={{
       gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '20px',
-      marginBottom: '32px',
     }}>
       {cards.map((card, index) => (
         <motion.div
@@ -34,22 +31,17 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <GlassCard style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <span style={{ fontSize: '24px' }}>{card.icon}</span>
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-2xl">{card.icon}</span>
             </div>
-            <p style={{
+            <p className="text-sm text-gray-400 mb-1" style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: '14px',
-              color: '#6B6B6B',
-              marginBottom: '4px',
             }}>
               {card.label}
             </p>
-            <p style={{
+            <p className="text-3xl font-bold" style={{
               fontFamily: "'Unbounded', sans-serif",
-              fontSize: '32px',
-              fontWeight: 700,
               color: card.color,
             }}>
               {card.value}
@@ -71,74 +63,71 @@ interface UsernameTableProps {
   usernames: Username[];
   onReset: (username: string) => void;
   onDelete: (username: string) => void;
+  onUpdate: (user: Username) => void;
+  onViewDetails: (username: string) => void;
   isLoading: boolean;
+  selectedUsernames: string[];
+  onSelectUser: (username: string, selected: boolean) => void;
+  onSelectAll: (selected: boolean) => void;
+  allSelected: boolean;
 }
 
-export const UsernameTable: React.FC<UsernameTableProps> = ({ usernames, onReset, onDelete, isLoading }) => {
+export const UsernameTable: React.FC<UsernameTableProps> = ({ 
+  usernames, onReset, onDelete, onUpdate, onViewDetails, isLoading,
+  selectedUsernames, onSelectUser, onSelectAll, allSelected
+}) => {
   return (
     <GlassCard>
-      <h3 style={{
+      <h3 className="text-xl font-semibold text-[#F5EFE0] mb-6" style={{
         fontFamily: "'Unbounded', sans-serif",
-        fontSize: '20px',
-        fontWeight: 600,
-        color: '#F5EFE0',
-        marginBottom: '24px',
       }}>
         Username Management
       </h3>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-        }}>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
           <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <th style={{
-                padding: '12px',
-                textAlign: 'left',
+            <tr className="border-b border-white/8">
+              <th className="p-3 text-center w-10">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={(e) => onSelectAll(e.target.checked)}
+                  className="cursor-pointer"
+                  aria-label="Select all usernames"
+                />
+              </th>
+              <th className="p-3 text-left text-sm font-medium text-gray-400" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
               }}>Username</th>
-              <th style={{
-                padding: '12px',
-                textAlign: 'left',
+              <th className="p-3 text-left text-sm font-medium text-gray-400" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
               }}>Status</th>
-              <th style={{
-                padding: '12px',
-                textAlign: 'left',
+              <th className="p-3 text-left text-sm font-medium text-gray-400" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
               }}>Created</th>
-              <th style={{
-                padding: '12px',
-                textAlign: 'right',
+              <th className="p-3 text-right text-sm font-medium text-gray-400" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
               }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {usernames.map((user) => (
-              <tr key={user.username} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '12px', color: '#F5EFE0', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <tr key={user.username} className="border-b border-white/5">
+                <td className="p-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsernames.includes(user.username)}
+                    onChange={(e) => onSelectUser(user.username, e.target.checked)}
+                    className="cursor-pointer"
+                    aria-label={`Select ${user.username}`}
+                  />
+                </td>
+                <td className="p-3 text-[#F5EFE0]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   {user.username}
                 </td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
+                <td className="p-3">
+                  <span className="px-3 py-1 rounded-full text-xs" style={{
                     fontFamily: "'Space Grotesk', sans-serif",
                     background: user.isGenerated ? 'rgba(0,200,83,0.2)' : 'rgba(255,145,0,0.2)',
                     color: user.isGenerated ? '#00C853' : '#FF9100',
@@ -152,19 +141,36 @@ export const UsernameTable: React.FC<UsernameTableProps> = ({ usernames, onReset
                 <td style={{ padding: '12px', textAlign: 'right' }}>
                   <Button
                     variant="secondary"
-                    onClick={() => onReset(user.username)}
-                    disabled={isLoading || user.isGenerated}
-                    style={{ padding: '8px 16px', fontSize: '12px', marginRight: '8px' }}
+                    onClick={() => onViewDetails(user.username)}
+                    disabled={isLoading}
+                    className="px-4 py-2 text-xs mr-2"
                   >
-                    Reset
+                    👁️ View
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => onUpdate(user)}
+                    disabled={isLoading}
+                    className="px-4 py-2 text-xs mr-2"
+                  >
+                    ✏️ Edit
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => onReset(user.username)}
+                    disabled={isLoading || !user.isGenerated}
+                    className="px-4 py-2 text-xs mr-2"
+                  >
+                    🔄 Reset
                   </Button>
                   <Button
                     variant="secondary"
                     onClick={() => onDelete(user.username)}
                     disabled={isLoading}
-                    style={{ padding: '8px 16px', fontSize: '12px', color: '#FF1744', borderColor: '#FF1744' }}
+                    className="px-4 py-2 text-xs"
+                    style={{ color: '#FF1744', borderColor: '#FF1744' }}
                   >
-                    Delete
+                    🗑️ Delete
                   </Button>
                 </td>
               </tr>
@@ -174,10 +180,7 @@ export const UsernameTable: React.FC<UsernameTableProps> = ({ usernames, onReset
       </div>
 
       {usernames.length === 0 && (
-        <p style={{
-          textAlign: 'center',
-          padding: '40px',
-          color: '#6B6B6B',
+        <p className="text-center p-10 text-gray-400" style={{
           fontFamily: "'Space Grotesk', sans-serif",
         }}>
           No usernames found. Upload a CSV to get started.
@@ -228,20 +231,13 @@ export const BulkUpload: React.FC<BulkUploadProps> = ({ onUpload, isLoading }) =
 
   return (
     <GlassCard>
-      <h3 style={{
+      <h3 className="text-xl font-semibold text-[#F5EFE0] mb-4" style={{
         fontFamily: "'Unbounded', sans-serif",
-        fontSize: '20px',
-        fontWeight: 600,
-        color: '#F5EFE0',
-        marginBottom: '16px',
       }}>
         Bulk Upload
       </h3>
-      <p style={{
+      <p className="text-sm text-gray-400 mb-6" style={{
         fontFamily: "'Space Grotesk', sans-serif",
-        fontSize: '14px',
-        color: '#6B6B6B',
-        marginBottom: '24px',
       }}>
         Upload a CSV file with usernames (one per line)
       </p>
@@ -267,12 +263,11 @@ export const BulkUpload: React.FC<BulkUploadProps> = ({ onUpload, isLoading }) =
           type="file"
           accept=".csv"
           onChange={handleFileInput}
-          style={{ display: 'none' }}
+          className="hidden"
+          aria-label="Upload CSV file"
         />
-        <p style={{
+        <p className="text-base text-gray-400" style={{
           fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: '16px',
-          color: '#6B6B6B',
         }}>
           {isLoading ? 'Uploading...' : 'Drag & drop CSV file here or click to browse'}
         </p>

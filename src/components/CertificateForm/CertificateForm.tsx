@@ -129,34 +129,24 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
   const hasErrors = Object.values(errors).some(error => error);
 
   return (
-    <section id="certificate-form" style={{ padding: '80px 20px', position: 'relative' }}>
+    <section id="certificate-form" className="py-20 px-5 relative">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <GlassCard style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <h2 style={{
+        <GlassCard className="max-w-[600px] mx-auto">
+          <h2 className="text-[32px] font-semibold text-[#F5EFE0] text-center mb-8" style={{
             fontFamily: "'Unbounded', sans-serif",
-            fontSize: '32px',
-            fontWeight: 600,
-            color: '#F5EFE0',
-            textAlign: 'center',
-            marginBottom: '32px',
           }}>
             Generate Your Certificate
           </h2>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-500 mb-2" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
-                marginBottom: '8px',
               }}>
                 Username
               </label>
@@ -170,25 +160,20 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
                 autoComplete="off"
               />
               {usernameStatus === 'checking' && (
-                <p style={{ fontSize: '13px', color: '#6B6B6B', marginTop: '8px' }}>
+                <p className="text-[13px] text-gray-500 mt-2">
                   Checking username...
                 </p>
               )}
               {usernameStatus === 'valid' && !errors.username && (
-                <p style={{ fontSize: '13px', color: '#00C853', marginTop: '8px' }}>
+                <p className="text-[13px] text-green-500 mt-2">
                   ✓ Username available
                 </p>
               )}
             </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-500 mb-2" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
-                marginBottom: '8px',
               }}>
                 Full Name
               </label>
@@ -202,28 +187,19 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
                 autoComplete="off"
               />
               {formData.name && !errors.name && (
-                <p style={{
-                  fontSize: '13px',
-                  color: '#00C853',
-                  marginTop: '8px',
-                }}>
+                <p className="text-[13px] text-green-500 mt-2">
                   Preview: {formData.name}
                 </p>
               )}
             </div>
 
-            <div style={{ marginBottom: '32px' }}>
-              <label style={{
-                display: 'block',
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-gray-500 mb-3" style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#6B6B6B',
-                marginBottom: '12px',
               }}>
                 Event Type
               </label>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <div className="flex gap-4 flex-wrap">
                 {(['Technical', 'Non-Technical'] as const).map((type) => (
                   <button
                     key={type}
@@ -247,11 +223,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
                 ))}
               </div>
               {touched.eventType && errors.eventType && (
-                <p style={{ 
-                  color: '#FF1744', 
-                  fontSize: '13px', 
-                  marginTop: '8px',
-                }}>
+                <p className="text-error text-[13px] mt-2">
                   {errors.eventType}
                 </p>
               )}
@@ -261,7 +233,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
               type="submit"
               disabled={!isFormValid || hasErrors || isLoading}
               isLoading={isLoading}
-              style={{ width: '100%' }}
+              className="w-full"
             >
               🔥 GENERATE CERTIFICATE
             </Button>

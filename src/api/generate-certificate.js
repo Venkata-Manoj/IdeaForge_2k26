@@ -4,6 +4,12 @@ import { generateCertificate } from './_lib/pdfGenerator.js';
 import { randomBytes } from 'crypto';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from './_lib/rateLimit.js';
 
+// Admin usernames with unlimited certificate access (from environment)
+const adminUsernames = (process.env.ADMIN_USERNAMES || '')
+  .split(',')
+  .map(u => u.trim().toLowerCase())
+  .filter(u => u.length > 0);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -77,15 +83,21 @@ export default async function handler(req, res) {
       });
     }
 
-    if (user.isGenerated) {
+    // Check if user is admin (unlimited certificates)
+    const isAdmin = adminUsernames.includes(normalizedUsername);
+
+    // Only check isGenerated for non-admin users
+    if (!isAdmin && user.isGenerated) {
       return res.status(409).json({ 
         error: 'Certificate already generated for this username' 
       });
     }
 
-    // Mark username as generated
-    user.isGenerated = true;
-    await user.save();
+    // Mark username as generated (for non-admins only, admins keep isGenerated=false)
+    if (!isAdmin) {
+      user.isGenerated = true;
+      await user.save();
+    }
 
     // Generate unique certificate ID using cryptographically secure RNG
     const part1 = randomBytes(3).toString('hex').toUpperCase();

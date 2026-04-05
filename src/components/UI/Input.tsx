@@ -12,17 +12,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     if (success) inputClass += ' success';
 
     return (
-      <div style={{ width: '100%' }}>
+      <div className="w-full">
         <input
           ref={ref}
           className={`${inputClass} ${className}`}
           {...props}
         />
         {error && (
-          <p style={{ 
-            color: '#FF1744', 
-            fontSize: '13px', 
-            marginTop: '8px',
+          <p className="text-error text-[13px] mt-2" style={{
             fontFamily: "'Space Grotesk', sans-serif"
           }}>
             {error}

@@ -32,9 +32,6 @@ export default async function handler(req, res) {
 
   try {
     const { password } = req.body;
-    console.log('Password received:', password);
-    console.log('Hash from env:', ADMIN_PASSWORD_HASH);
-    console.log('Compare result:', await bcrypt.compare(password, ADMIN_PASSWORD_HASH));
     if (!JWT_SECRET || !ADMIN_PASSWORD_HASH) {
       return res.status(500).json({ error: 'Server misconfigured' });
     }

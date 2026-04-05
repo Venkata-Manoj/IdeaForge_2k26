@@ -2,6 +2,12 @@
 import { connectToDatabase } from './_lib/db.js';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from './_lib/rateLimit.js';
 
+// Admin usernames with unlimited certificate access (from environment)
+const adminUsernames = (process.env.ADMIN_USERNAMES || '')
+  .split(',')
+  .map(u => u.trim().toLowerCase())
+  .filter(u => u.length > 0);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ valid: false, error: 'Method not allowed' });
@@ -50,8 +56,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check if certificate already generated
-    if (user.isGenerated) {
+    // Check if user is admin (unlimited certificates allowed)
+    const isAdmin = adminUsernames.includes(normalizedUsername);
+
+    // Check if certificate already generated (skip for admins)
+    if (!isAdmin && user.isGenerated) {
       return res.status(409).json({ 
         valid: false, 
         error: 'Certificate already generated for this username.' 
@@ -60,7 +69,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ 
       valid: true, 
-      message: 'Username is valid and available' 
+      message: isAdmin ? 'Admin username validated - unlimited certificates' : 'Username is valid and available',
+      isAdmin
     });
 
   } catch (error) {
