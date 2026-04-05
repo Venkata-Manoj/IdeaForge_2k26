@@ -70,19 +70,38 @@ interface UsernameTableProps {
   onSelectUser: (username: string, selected: boolean) => void;
   onSelectAll: (selected: boolean) => void;
   allSelected: boolean;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  totalCount: number;
 }
 
 export const UsernameTable: React.FC<UsernameTableProps> = ({ 
   usernames, onReset, onDelete, onUpdate, onViewDetails, isLoading,
-  selectedUsernames, onSelectUser, onSelectAll, allSelected
+  selectedUsernames, onSelectUser, onSelectAll, allSelected,
+  searchQuery, onSearchChange, totalCount
 }) => {
   return (
     <GlassCard>
-      <h3 className="text-xl font-semibold text-[#F5EFE0] mb-6" style={{
-        fontFamily: "'Unbounded', sans-serif",
-      }}>
-        Username Management
-      </h3>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h3 className="text-xl font-semibold text-[#F5EFE0]" style={{
+          fontFamily: "'Unbounded', sans-serif",
+        }}>
+          Username Management
+        </h3>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-400 font-grotesk">
+            Showing {usernames.length} of {totalCount} users
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search usernames..."
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-[#F5EFE0] text-sm font-grotesk w-48 md:w-64"
+            aria-label="Search usernames"
+          />
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">

@@ -144,16 +144,19 @@ function AdminPage() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [order, setOrder] = useState('desc');
   const [selectedUsernames, setSelectedUsernames] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
 
   const loadStats = async () => {
     const data = await getAdminStats();
     if (data) setStats(data);
   };
 
-  const loadUsernames = async () => {
-    const data = await getUsernames(1, 20, sortBy, order);
+  const loadUsernames = async (search = '') => {
+    const data = await getUsernames(1, 100, sortBy, order, search);
     if (data) {
       setUsernames(data.usernames);
+      setTotalCount(data.pagination.total);
       // Clear selection when data reloads
       setSelectedUsernames([]);
     }
@@ -166,12 +169,15 @@ function AdminPage() {
     
     const fetchData = async () => {
       const statsData = await getAdminStats();
-      const usernamesData = await getUsernames(1, 20, sortBy, order);
+      const usernamesData = await getUsernames(1, 100, sortBy, order, searchQuery);
       
       if (!mounted) return;
       
       if (statsData) setStats(statsData);
-      if (usernamesData) setUsernames(usernamesData.usernames);
+      if (usernamesData) {
+        setUsernames(usernamesData.usernames);
+        setTotalCount(usernamesData.pagination.total);
+      }
     };
     
     fetchData();
@@ -179,7 +185,7 @@ function AdminPage() {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated, sortBy, order]);
+  }, [isAuthenticated, sortBy, order, searchQuery]);
 
   const handleLogin = async (password: string): Promise<boolean> => {
     const result = await adminLogin(password);
@@ -470,6 +476,9 @@ function AdminPage() {
           onSelectUser={handleSelectUser}
           onSelectAll={handleSelectAll}
           allSelected={allSelected}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          totalCount={totalCount}
         />
 
         {/* Bulk Actions Bar */}
