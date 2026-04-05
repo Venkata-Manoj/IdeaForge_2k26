@@ -30,9 +30,10 @@ const handlers = {
 };
 
 export default async function handler(req, res) {
-  // Get the path after /api/, stripping any trailing slash
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
+  // Get the path after /api/ and normalize trailing slashes
+  // Parse only the pathname portion of req.url to avoid Host header injection
+  const pathname = req.url.split('?')[0];
+  const path = pathname.replace(/^\/api\//, '').replace(/\/$/, '');
 
   // Find the matching handler
   const routeHandler = handlers[path];
