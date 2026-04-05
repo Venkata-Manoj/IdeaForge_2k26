@@ -6,14 +6,38 @@
       "use": "@vercel/static-build"
     },
     {
-      "src": "src/api/**/*.js",
+      "src": "src/api/validate-username.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "src/api/generate-certificate.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "src/api/download-certificate.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "src/api/admin/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/src/api/$1"
+      "src": "/api/admin/(.*)",
+      "dest": "/src/api/admin/index.js"
+    },
+    {
+      "src": "/api/validate-username",
+      "dest": "/src/api/validate-username.js"
+    },
+    {
+      "src": "/api/generate-certificate",
+      "dest": "/src/api/generate-certificate.js"
+    },
+    {
+      "src": "/api/download-certificate",
+      "dest": "/src/api/download-certificate.js"
     },
     {
       "src": "/(.*)",
