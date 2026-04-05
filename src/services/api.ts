@@ -129,9 +129,10 @@ export interface UsernamesResponse {
   };
 }
 
-export const getUsernames = async (page = 1, limit = 20, sortBy = 'createdAt', order = 'desc'): Promise<UsernamesResponse | null> => {
+export const getUsernames = async (page = 1, limit = 100, sortBy = 'createdAt', order = 'desc', search = ''): Promise<UsernamesResponse | null> => {
   try {
-    const response = await apiClient.get(`/api/admin/usernames?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`);
+    const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+    const response = await apiClient.get(`/api/admin/usernames?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}${searchParam}`);
     return response.data;
   } catch {
     return null;
